@@ -41,3 +41,11 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+.idea
+.idea/*
+*.iml
+target
+*/target
+target/*
+*/target/*
