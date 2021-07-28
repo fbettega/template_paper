@@ -2,8 +2,9 @@ library(tidyverse)
 
 
 
-path <- "\\\\MEDIA-VAULT\\script\\ftp.ncbi.nlm.nih.gov\\pubmed\\baseline"
+# extraction from pubmed location
 
+path <- "../Data/ftp.ncbi.nlm.nih.gov/pubmed/baseline/"
 
 expected_nb_of_files <- 1062
 
@@ -34,11 +35,17 @@ md5_table <- md5_table %>%
 
 
 
-md5_table %>% mutate(bool = my_md5 == md5) %>% filter(!bool)
+bad_hash <-  md5_table %>% mutate(bool = my_md5 == md5) %>% filter(!bool)
+if (nrow(bad_hash) == 0){
+  
+lapply(xml_files,function(x){
+R.utils::gunzip(paste0(path,"\\",x),destname= paste0("../Data/","temp/",str_remove(x,"\\.gz")), remove=FALSE)
+}
+)
 
-
-
-
+zip(zipfile = paste0("../Data/","template_paper_data.zip"),list.files(path = "../Data/temp/",full.names = TRUE))
+unlink("../Data/temp", recursive = TRUE)
+}
 
 
 
