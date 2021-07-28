@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 5.196.65.5:53306
--- Generation Time: Jul 26, 2021 at 02:38 PM
+-- Generation Time: Jul 27, 2021 at 11:17 AM
 -- Server version: 10.6.3-MariaDB-1:10.6.3+maria~focal
 -- PHP Version: 7.2.8
 
@@ -28,16 +28,16 @@ DELIMITER $$
 --
 -- Functions
 --
-CREATE DEFINER=`root`@`%` FUNCTION `funcArticleID` (`p_title` TEXT, `p_doi` TEXT, `p_date` DATE, `p_venue` TEXT, `p_abstract` TEXT, `p_lang` TEXT) RETURNS INT(11) MODIFIES SQL DATA
+CREATE DEFINER=`root`@`%` FUNCTION `funcArticleID` (`p_title` TEXT, `p_doi` TEXT, `p_year` INT, `p_venue` TEXT, `p_abstract` TEXT, `p_lang` TEXT, `p_pmid` INT) RETURNS INT(11) MODIFIES SQL DATA
     DETERMINISTIC
     SQL SECURITY INVOKER
 BEGIN
 	DECLARE r INT;
-    SET @r = (SELECT id FROM articles WHERE doi=p_doi);
+    SET @r = (SELECT id FROM articles WHERE p_pmid=pmid);
     IF (@r IS NULL)
 	THEN
-		INSERT INTO `articles` (`id`, `title`, `doi`, `date`, `venue`, `abstract`, `lang`)
-		VALUES (NULL, p_title, p_doi, p_date, funcVenueID(p_venue), p_abstract, p_lang);
+		INSERT INTO `articles` (`id`, `title`, `doi`, `year`, `venue`, `abstract`, `lang`, `pmid`)
+		VALUES (NULL, p_title, p_doi, p_year, funcVenueID(p_venue), p_abstract, p_lang, p_pmid);
     	SET @r = LAST_INSERT_ID();
     END IF;
     RETURN(@r);
@@ -84,11 +84,12 @@ DELIMITER ;
 CREATE TABLE `articles` (
   `id` int(11) NOT NULL,
   `title` text NOT NULL,
-  `doi` text NOT NULL,
-  `date` date NOT NULL,
+  `doi` text DEFAULT NULL,
+  `year` int(11) NOT NULL,
   `venue` int(11) NOT NULL,
   `abstract` text NOT NULL,
-  `lang` text NOT NULL
+  `lang` text NOT NULL,
+  `pmid` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -147,8 +148,8 @@ CREATE TABLE `venues` (
 --
 ALTER TABLE `articles`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `doi` (`doi`) USING HASH,
-  ADD KEY `FK_venues` (`venue`);
+  ADD KEY `FK_venues` (`venue`),
+  ADD KEY `Index_pmid` (`pmid`) USING BTREE;
 
 --
 -- Indexes for table `authors`
@@ -161,8 +162,8 @@ ALTER TABLE `authors`
 -- Indexes for table `authorships`
 --
 ALTER TABLE `authorships`
-  ADD KEY `FK_authorship_author` (`author`),
-  ADD KEY `FK_authorship_article` (`article`);
+  ADD UNIQUE KEY `article` (`article`,`author`),
+  ADD KEY `FK_authorship_author` (`author`);
 
 --
 -- Indexes for table `comparaisons`
