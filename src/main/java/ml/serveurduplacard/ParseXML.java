@@ -124,7 +124,7 @@ public class ParseXML {
                         pushBatch(buffer, db);
                         buffer.clear();
                     }
-                } catch (ArticleParseException e) {
+                } catch (Exception e) {
                     logFailure(e.getMessage(), arguments.xmlInput);
                 }
 
