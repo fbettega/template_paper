@@ -125,7 +125,7 @@ public class ParseXML {
                         buffer.clear();
                     }
                 } catch (Exception e) {
-                    logFailure(e.getMessage(), arguments.xmlInput);
+                    logFailure(e.getMessage(), f.getAbsolutePath());
                 }
 
             }
@@ -216,7 +216,12 @@ public class ParseXML {
             if(date2 == null) {
                 NodeList mList = dateNode2.getElementsByTagName("MedlineDate");
                 if(mList != null && mList.getLength() > 0) {
-                    date2 = mList.item(0).getTextContent().split(" ")[0];
+                    try {
+                        date2 = Integer.valueOf(mList.item(0).getTextContent().split(" ")[0]).toString();
+                    } catch (Exception e) {
+                        throw new ArticleParseException("no date (Parse error): " + pumedId);
+                    }
+
                 }
             }
 
